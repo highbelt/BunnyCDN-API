@@ -18,6 +18,7 @@ class BunnyAPI
     private const HOSTNAME = 'storage.bunnycdn.com';//FTP hostname
     private const STREAM_LIBRARY_ACCESS_KEY = 'XXXX-XXXX-XXXX';
     private string $api_key;
+    private string $stream_api_key;
     private string $access_key;
     private string $storage_name;
     private $connection;
@@ -33,6 +34,7 @@ class BunnyAPI
                 throw new BunnyAPIException("You must provide an API key");
             } else {
                 $this->api_key = self::API_KEY;
+                $this->stream_api_key = self::STREAM_LIBRARY_ACCESS_KEY;
             }
         } catch (BunnyAPIException $e) {//display error message
             echo $e->errorMessage();
@@ -50,6 +52,19 @@ class BunnyAPI
                 throw new BunnyAPIException('$api_key cannot be empty');
             } else {
                 $this->api_key = $api_key;
+            }
+        } catch (BunnyAPIException $e) {//display error message
+            echo $e->errorMessage();
+        }
+    }
+
+    public function streamApiKey(string $api_key = '')
+    {
+        try {
+            if (!isset($api_key) || trim($api_key) === '') {
+                throw new BunnyAPIException('$api_key cannot be empty');
+            } else {
+                $this->stream_api_key = $api_key;
             }
         } catch (BunnyAPIException $e) {//display error message
             echo $e->errorMessage();
@@ -121,7 +136,7 @@ class BunnyAPI
             curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "AccessKey: $this->api_key"));
         } elseif ($video_stream_call) {//Video stream
             curl_setopt($curl, CURLOPT_URL, self::VIDEO_STREAM_URL . (string)$url);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array("AccessKey: " . self::STREAM_LIBRARY_ACCESS_KEY . ""));
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "AccessKey: " . $this->stream_api_key . ""));
         } else {//Storage zone
             curl_setopt($curl, CURLOPT_URL, self::STORAGE_API_URL . (string)$url);
             curl_setopt($curl, CURLOPT_HTTPHEADER, array("AccessKey: $this->access_key"));
